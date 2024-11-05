@@ -1,0 +1,10 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+	"files.eol": "\n",
+	"debug.openDebug": "neverOpen",
+	"python.linting.enabled": false,
+	"ev3devBrowser.download.include": "src/*py",
+	"python.languageServer": "None",
+	"python.REPL.enableREPLSmartSend": false,
+	"git.ignoreLimitWarning": true
+}
