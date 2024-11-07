@@ -763,12 +763,32 @@ class LSA(mindsensors_i2c):
 
     ## Default LightSensorArray I2C Address
     LSA_ADDRESS = 0x14
+    
     ## Command Register
-    LSA_COMMAND = 0x41
+
+    '''
+    # TODO: encontrar o 'verdadeiro' endereço dos comandos, porque quando usamos o endereço 0x41 sem o left shift
+            ele aponta pra alguma região maluca do i2c e pode crashar o sensor/ev3 se algo for escrito no endereço.
+            
+            entretanto, quando lemos o endereço já 'shiftado', ele aparenta estar fixo no valor 'S' em hex... precisamos descobrir o porquê.
+
+            motivo por usar endereços 'shiftados' para a esquerda: https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/i2c.html#addressing
+    '''
+
+    LSA_COMMAND = (0x41>>1)
+    
     ## Calibrated Register. Will return an 8 byte array
     LSA_CALIBRATED = 0x42
     ## Uncalibrated Register. Will return an 8 byte array
     LSA_UNCALIBRATED = 0x6A
+
+    LSA_WHITE_LIMIT = 0x4A
+
+    LSA_BLACK_LIMIT = 0x52
+
+    LSA_WHITE_CALIBRATION_DATA = 0x5A
+
+    LSA_BLACK_CALIBRATION_DATA = 0x62
 
     ## Initialize the class with the i2c address of your LightSensorArray
     #  @param self The object pointer.
@@ -781,75 +801,69 @@ class LSA(mindsensors_i2c):
     #  @param self The object pointer.
     #  @param cmd Value to write to the command register.
     def command(self, cmd):
-        self.writeByte(self.LSA_COMMAND, cmd)
+        self.i2c.write(reg=self.LSA_COMMAND, data=cmd)
 
-    def read_command_regs(self):
-        return self.readString(self.LSA_COMMAND, 8)
+    def read_current_command(self):
+        return self.readByte(reg=self.LSA_COMMAND)
 
     ## Calibrates the white value for the LightSensorArray
     #  @param self The object pointer.
     def White_Cal(self):
-        self.command(87)
+        self.command(b'W')
 
     ## Calibrates the black value for the LightSensorArray
     #  @param self The object pointer.
     def Black_Cal(self):
-        self.command(66)
+        self.command(b'B')
 
     ## Wakes up or turns on the LEDs of the LightSensorArray
     #  @param self The object pointer.
     def Wakeup(self):
-        self.command(80)
+        self.command(b'P')
 
     ## Puts to sleep, or turns off the LEDs of the LightSensorArray
     #  @param self The object pointer.
     def Sleep(self):
-        self.command(68)
+        self.command(b'D')
+
+    def get_data(self, address, size):
+        data = bytearray(self.i2c.read(address, size))
+        return data
 
     ## Reads the eight(8) calibrated light sensor values of the LightSensorArray
     #  @param self The object pointer.
     def read_calibrated(self):
-
-        '''
-        TODO: a leitura do i2c.read() só funciona se começarmos a ler
-        um registrador antes, que nesse caso é o 0x41, o responsável pelos
-        comandos.
-
-        e pra completar, a leitura do i2c só rola com conjuntos de dados
-        em múltiplos de 8
-        
-        como estamos acessando 8 sensores + registrador de comandos, vamos
-        precisar do próximo múltiplo de 8, o 16.
-
-        não sei porquê funciona assim, mas até lá, usamos essa gambiarra:
-        '''
-        
-        data = self.i2c.read(0x42, 15)
-        
-        b = bytearray(data)
+        b = self.get_data(self.LSA_CALIBRATED, 8)
         array = [ b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7] ]
         return array
 
     ## Reads the eight(8) uncalibrated light sensor values of the LightSensorArray
     #  @param self The object pointer.
-    def read_raw_volatges(self):
-        s1 = self.readInteger(self.LSA_UNCALIBRATED)
-        s2 = self.readInteger(self.LSA_UNCALIBRATED + 2)
-        s3 = self.readInteger(self.LSA_UNCALIBRATED + 4)
-        s4 = self.readInteger(self.LSA_UNCALIBRATED + 6)
-        s5 = self.readInteger(self.LSA_UNCALIBRATED + 8)
-        s6 = self.readInteger(self.LSA_UNCALIBRATED + 10)
-        s7 = self.readInteger(self.LSA_UNCALIBRATED + 12)
-        s8 = self.readInteger(self.LSA_UNCALIBRATED + 14)
-        array = [s1, s2, s3, s4, s5, s6, s7, s8]
+    def get_raw_voltages(self):
+        s = self.get_data(self.LSA_UNCALIBRATED, 16)
+        array = [s[0:1], s[2:3], s[4:5], s[6:7], s[8:9], s[10:11], s[12:13], s[14:15] ]
         return array
         
 
-    def read_white_limit(self):
-        return self.i2c.read(0x5A, 7)
+    def get_white_limit(self):
+        data = self.get_data(self.LSA_WHITE_LIMIT, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
 
-    def read_black_limit(self):
-        return self.i2c.read(0x6A, 7)
+    def get_black_limit(self):
+        data = self.get_data(self.LSA_BLACK_LIMIT, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
+
+    def get_white_calibration_data(self):
+        data = self.get_data(self.LSA_WHITE_CALIBRATION_DATA, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
+
+    def get_black_calibration_data(self):
+        data = self.get_data(self.LSA_BLACK_CALIBRATION_DATA, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
 
  ## BLOB: this class is a subclass of NXTCAM. There is no need to call this class directly.
 class BLOB():
