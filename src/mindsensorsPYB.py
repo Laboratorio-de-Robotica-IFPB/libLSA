@@ -1,7 +1,4 @@
 #!/usr/bin/env pybricks-micropython
-#!/usr/bin/env pybricks-micropython
-
-#Version 1.02
 
 from pybricks.hubs import EV3Brick
 from pybricks.iodevices import I2CDevice
@@ -63,7 +60,7 @@ class mindsensors_i2c():
     #  @param self The object pointer.
     #  @param comamnd to write .
     def issueCommand(self,  value):
-       self.i2c.write( 0x42, value)
+       self.i2c.write( 0x41, value)
              
 
 
@@ -762,7 +759,7 @@ class LINELEADER(mindsensors_i2c):
 class LSA(mindsensors_i2c):
 
     ## Default LightSensorArray I2C Address
-    LSA_ADDRESS = 0x14
+    LSA_ADDRESS = const(0x14)
     
     ## Command Register
 
@@ -775,27 +772,27 @@ class LSA(mindsensors_i2c):
             motivo por usar endereços 'shiftados' para a esquerda: https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/i2c.html#addressing
     '''
 
-    LSA_COMMAND = (0x41>>1)
+    LSA_COMMAND = const(0x41)
     
     ## Calibrated Register. Will return an 8 byte array
-    LSA_CALIBRATED = 0x42
+    LSA_CALIBRATED = const(0x42)
     ## Uncalibrated Register. Will return an 8 byte array
-    LSA_UNCALIBRATED = 0x6A
+    LSA_UNCALIBRATED = const(0x6A)
 
-    LSA_WHITE_LIMIT = 0x4A
+    LSA_WHITE_LIMIT = const(0x4A)
 
-    LSA_BLACK_LIMIT = 0x52
+    LSA_BLACK_LIMIT = const(0x52)
 
-    LSA_WHITE_CALIBRATION_DATA = 0x5A
+    LSA_WHITE_CALIBRATION_DATA = const(0x5A)
 
-    LSA_BLACK_CALIBRATION_DATA = 0x62
+    LSA_BLACK_CALIBRATION_DATA = const(0x62)
 
     ## Initialize the class with the i2c address of your LightSensorArray
     #  @param self The object pointer.
     #  @param lsa_address Address of your LightSensorArray.
-    def __init__(self,  port,lsa_address = LSA_ADDRESS):
+    def __init__(self, port):
         #the LSA address
-        mindsensors_i2c.__init__(self, port, lsa_address)
+        mindsensors_i2c.__init__(self, port, self.LSA_ADDRESS)
  
     ## Writes a value to the command register
     #  @param self The object pointer.
@@ -827,15 +824,17 @@ class LSA(mindsensors_i2c):
         self.command(b'D')
 
     def get_data(self, address, size):
-        data = bytearray(self.i2c.read(address, size))
-        return data
+        try:
+            data = self.i2c.read(address, size)
+            return bytearray(data)
+        except OSError as err:
+            print("ERROR: i2c device is not responding, check the wiring")
 
     ## Reads the eight(8) calibrated light sensor values of the LightSensorArray
     #  @param self The object pointer.
-    def read_calibrated(self):
+    def read_calibrated(self) -> list:
         b = self.get_data(self.LSA_CALIBRATED, 8)
-        array = [ b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7] ]
-        return array
+        return b
 
     ## Reads the eight(8) uncalibrated light sensor values of the LightSensorArray
     #  @param self The object pointer.
@@ -843,7 +842,6 @@ class LSA(mindsensors_i2c):
         s = self.get_data(self.LSA_UNCALIBRATED, 16)
         array = [s[0:1], s[2:3], s[4:5], s[6:7], s[8:9], s[10:11], s[12:13], s[14:15] ]
         return array
-        
 
     def get_white_limit(self):
         data = self.get_data(self.LSA_WHITE_LIMIT, 8)
