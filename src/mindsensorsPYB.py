@@ -60,10 +60,8 @@ class mindsensors_i2c():
     #  @param self The object pointer.
     #  @param comamnd to write .
     def issueCommand(self,  value):
-       self.i2c.write( 0x41, value)
-             
-
-
+        self.i2c.write( 0x41, value)
+        
     ## Read a byte array from your i2c device starting at a given location
     #  @param self The object pointer.
     #  @param reg The first register in the array to read from.
@@ -752,31 +750,16 @@ class LINELEADER(mindsensors_i2c):
     def getKDfactor(self):
         return self.readByte(self.LL_KDfactor)
         
-
-
+        
 ## LSA: this class provides functions for LightSensorArray from mindsensors.com
 #  for read and write operations.
 class LSA(mindsensors_i2c):
-
-    ## Default LightSensorArray I2C Address
     LSA_ADDRESS = const(0x14)
-    
-    ## Command Register
-
-    '''
-    # TODO: encontrar o 'verdadeiro' endereço dos comandos, porque quando usamos o endereço 0x41 sem o left shift
-            ele aponta pra alguma região maluca do i2c e pode crashar o sensor/ev3 se algo for escrito no endereço.
-            
-            entretanto, quando lemos o endereço já 'shiftado', ele aparenta estar fixo no valor 'S' em hex... precisamos descobrir o porquê.
-
-            motivo por usar endereços 'shiftados' para a esquerda: https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/i2c.html#addressing
-    '''
 
     LSA_COMMAND = const(0x41)
     
-    ## Calibrated Register. Will return an 8 byte array
     LSA_CALIBRATED = const(0x42)
-    ## Uncalibrated Register. Will return an 8 byte array
+
     LSA_UNCALIBRATED = const(0x6A)
 
     LSA_WHITE_LIMIT = const(0x4A)
@@ -791,9 +774,8 @@ class LSA(mindsensors_i2c):
     #  @param self The object pointer.
     #  @param lsa_address Address of your LightSensorArray.
     def __init__(self, port):
-        #the LSA address
         mindsensors_i2c.__init__(self, port, self.LSA_ADDRESS)
- 
+
     ## Writes a value to the command register
     #  @param self The object pointer.
     #  @param cmd Value to write to the command register.
@@ -826,7 +808,11 @@ class LSA(mindsensors_i2c):
     def get_data(self, address, size):
         try:
             data = self.i2c.read(address, size)
-            return bytearray(data)
+            
+            if data is not None:
+                return bytearray(data)
+            else:
+                print("WARNING: no data has returned")
         except OSError as err:
             print("ERROR: i2c device is not responding, check the wiring")
 
