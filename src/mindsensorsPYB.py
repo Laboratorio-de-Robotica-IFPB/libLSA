@@ -1,5 +1,92 @@
 #!/usr/bin/env pybricks-micropython
 from pybricks.iodevices import I2CDevice
+from pybricks.parameters import Port
+
+LSA_DEFAULT_ADDRESS = const(0x14)
+
+LSA_COMMAND = const(0x41)
+
+LSA_CALIBRATED = const(0x42)
+
+LSA_UNCALIBRATED = const(0x6A)
+
+LSA_WHITE_LIMIT = const(0x4A)
+
+LSA_BLACK_LIMIT = const(0x52)
+
+LSA_WHITE_CALIBRATION_DATA = const(0x5A)
+
+LSA_BLACK_CALIBRATION_DATA = const(0x62)
+
+class LightSensorArray:
+    port = Port()
+    device_address: int = 0
+    i2c_device = I2CDevice()
+
+    def __init__(self, port, address=LSA_DEFAULT_ADDRESS):
+        self.port = port
+
+        self.device_addres = address
+        self.i2c_device = I2CDevice(port, address)
+
+    def get_data(self, address, size):
+        try:
+            data = self.i2c_device.read(address, size)
+            
+            if data:
+                return bytearray(data)
+
+        except OSError as err:
+            print("ERROR: i2c device is not responding, check the wiring")
+
+    def command(self, cmd):
+        self.i2c_device.write(reg=LSA_COMMAND, data=cmd)
+
+    ## Calibrates the white value for the LightSensorArray
+    #  @param self The object pointer.
+    def calibrate_white(self):
+        self.command(b'W')
+
+    ## Calibrates the black value for the LightSensorArray
+    #  @param self The object pointer.
+    def calibrate_black(self):
+        self.command(b'B')
+
+    ## Wakes up or turns on the LEDs of the LightSensorArray
+    #  @param self The object pointer.
+    def wakeup(self):
+        self.command(b'P')
+
+    ## Puts to sleep, or turns off the LEDs of the LightSensorArray
+    #  @param self The object pointer.
+    def Sleep(self):
+        self.command(b'D')
+
+    def get_raw_voltages(self):
+        s = self.get_data(self.LSA_UNCALIBRATED, 16)
+        array = [s[0:1], s[2:3], s[4:5], s[6:7], s[8:9], s[10:11], s[12:13], s[14:15] ]
+        return array
+
+    def get_white_limit(self):
+        data = self.get_data(self.LSA_WHITE_LIMIT, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
+
+    def get_black_limit(self):
+        data = self.get_data(self.LSA_BLACK_LIMIT, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
+
+    def get_white_calibration_data(self):
+        data = self.get_data(self.LSA_WHITE_CALIBRATION_DATA, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
+
+    def get_black_calibration_data(self):
+        data = self.get_data(self.LSA_BLACK_CALIBRATION_DATA, 8)
+        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
+        return arr
+
 
 ## mindsensors_i2c: this class provides i2c functions
 #  for read and write operations.
