@@ -4,20 +4,30 @@ from pybricks.ev3devices import Motor
 from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.media.ev3dev import Font
 from pybricks.tools import wait
-from pybricks.robotics import DriveBase
-from mindsensorsPYB import LSA
+from mindsensorsPYB import LightSensorArray
 
 font = Font(size=6)
 
 ev3 = EV3Brick()
 ev3.screen.set_font(font)
 
-lsa = LSA(Port.S4)
+lsa = LightSensorArray(Port.S4)
 
 left_motor = Motor(Port.B)
 right_motor = Motor(Port.C)
 
+while True:
 
+    sv = lsa.get_raw_voltages()
+    
+    if sv is None:
+        print("WARNING: os dados do sensor são inválidos ou None.")
+    else:
+        print(sv)
+
+        print("handling data:", (sv[2] * sv[7])/ 4 * sv[5]) 
+
+'''
 while True:
     buttons = ev3.buttons.pressed()
     sv = lsa.read_calibrated()
@@ -43,3 +53,4 @@ while True:
         right_motor.stop()
         wait(1000)
     
+'''
