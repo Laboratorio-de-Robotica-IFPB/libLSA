@@ -12,10 +12,10 @@ font = Font(size=6)
 ev3 = EV3Brick()
 ev3.screen.set_font(font)
 
-lsa = LSA(Port.S4)
+lsa = LSA(Port.S3)
 
-left_motor = Motor(Port.B)
-right_motor = Motor(Port.C)
+#left_motor = Motor(Port.B)
+#right_motor = Motor(Port.C)
 
 
 while True:
@@ -23,23 +23,23 @@ while True:
     sv = lsa.read_calibrated()
     
     if Button.UP in buttons:
-        lsa.issueCommand('W')
+        lsa.calibrate_white()
         wait(1000)
         print("White Limit is sucessfully calibrated")
 
     if Button.DOWN in buttons:
-        lsa.issueCommand('B')
+        lsa.calibrate_black()
         wait(1000)
         print("Black Limit is sucessfully calibrated")
 
     print("leitura do sensor: ", sv)
 
-    left_motor.run(300)
-    right_motor.run(300)
+    #left_motor.run(300)
+    #right_motor.run(300)
     
     if sv == bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00'):
         ev3.speaker.beep()
-        left_motor.stop()
-        right_motor.stop()
+        #left_motor.stop()
+        #right_motor.stop()
         wait(1000)
     

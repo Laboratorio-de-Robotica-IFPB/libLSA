@@ -196,11 +196,12 @@ class LSA(mindsensors_i2c):
     #  @param lsa_address Address of your LightSensorArray.
     def __init__(self, port):
         mindsensors_i2c.__init__(self, port, self.LSA_ADDRESS)
+        self.wakeup()
 
     ## Writes a value to the command register
     #  @param self The object pointer.
     #  @param cmd Value to write to the command register.
-    def command(self, cmd):
+    def write_command(self, cmd):
         self.i2c.write(reg=self.LSA_COMMAND, data=cmd)
 
     def read_current_command(self):
@@ -208,30 +209,34 @@ class LSA(mindsensors_i2c):
 
     ## Calibrates the white value for the LightSensorArray
     #  @param self The object pointer.
-    def White_Cal(self):
-        self.command(b'W')
+    def calibrate_white(self):
+        self.write_command(b'W')
 
     ## Calibrates the black value for the LightSensorArray
     #  @param self The object pointer.
-    def Black_Cal(self):
-        self.command(b'B')
+    def calibrate_black(self):
+        self.write_command(b'B')
 
     ## Wakes up or turns on the LEDs of the LightSensorArray
     #  @param self The object pointer.
-    def Wakeup(self):
-        self.command(b'P')
+    def wakeup(self):
+        self.write_command(b'P')
 
     ## Puts to sleep, or turns off the LEDs of the LightSensorArray
     #  @param self The object pointer.
-    def Sleep(self):
-        self.command(b'D')
+    def sleep(self):
+        self.write_command(b'D')
 
     def get_data(self, address, size):
         try:
             data = self.i2c.read(address, size)
             
-            if data is not None:
-                return bytearray(data)
+            if data != None:
+                out = []
+
+                for d in data:
+                    out.append(int(d))
+                return out
             else:
                 print("WARNING: no data has returned")
         except OSError as err:
@@ -245,7 +250,7 @@ class LSA(mindsensors_i2c):
 
     ## Reads the eight(8) uncalibrated light sensor values of the LightSensorArray
     #  @param self The object pointer.
-    def get_raw_voltages(self):
+    def read_raw_voltages(self):
         s = self.get_data(self.LSA_UNCALIBRATED, 16)
         array = [s[0:1], s[2:3], s[4:5], s[6:7], s[8:9], s[10:11], s[12:13], s[14:15] ]
         return array
