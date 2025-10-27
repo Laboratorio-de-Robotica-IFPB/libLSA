@@ -1,20 +1,27 @@
-# ev3dev-lightarraysensor
+# libLSA - Biblioteca para utilizar o LightArraySensor no ev3dev
 
-O Objetivo desse projeto é conseguir controlar todas as funcionalidades presentes no sensor da mindsensors, de forma programática, utilizando o micropython e a plataforma do ev3dev
+O objetivo desse projeto é conseguir controlar todas as funcionalidades presentes no sensor da mindsensors, de forma programática, utilizando o micropython e a plataforma do ev3dev
 
-O suporte do sensor é bem completo quando utilizamos a plataforma base da lego, o Mindstorms, porém o software se tornou legado e não queremos mais depender da programação por blocos para utilizar o sensor com poder total :) 
+O suporte do sensor é bem completo quando utilizamos a plataforma base da lego, o LEGO EV3 Mindstorms, porém o software se tornou legado e não queremos mais depender da programação por blocos para utilizar o sensor em sua totalidade :) 
 
-## Etapas:
-- [x] Identificação do sensor pelo sistema do ev3dev
-- [x] Comunicação com o sensor de forma programada, utilizando o micropython
-- [x] Leitura dos valores não calibrados (raw)
-- [x] Leitura das informações do sensor
-- [ ] Escrita de comandos I2C arbitrários no sensor
-- [ ] Calibração do valor Branco
-- [ ] Calibração do valor Preto
-- [ ] Leitura de valores calibrados
-- [ ] Estudar os registros I2C disponíveis e suas funcionalidades
-- [ ] (Opcional) customizar/refatorar a biblioteca do mindsensors
+## Features:
+- [x] Leitura dos valores calibrados (0 a 100, do preto até o branco)
+- [x] Leitura dos valores de tensão puros
+- [x] Escrita de comandos I2C arbitrários no sensor
+- [x] Calibração do valor de referência do branco
+- [x] Calibração do valor de referência do preto
+
+
+## Como utilizar
+
+1. Copie o arquivo _**mindstormsPYB.py**_ para a raiz do seu projeto.
+2. Importe a biblioteca e instancie o sensor com a porta escolhida:
+   ```python3
+   from mindstormsPYB import LightArraySensor
+   lsa = LightSensorArray(Port.S4)
+   ```
+3. Leia o exemplo disponível na pasta _samples_ para saber como utilizar os métodos de calibração
+
 
 ## Referências:
 ### Geral
