@@ -23,7 +23,7 @@ class LightSensorArray:
             return bytearray(data)
 
         except OSError:
-            print("ERROR: falha na comunicação com o dispositivo I2C, verifique os cabos do sensor e a entrada correspondente.")
+            print("ERROR: Failed to communicate with the I2C device. Please check the sensor cables and the corresponding input port.")
 
     def send_command(self, cmd) -> None:
         self.i2c_device.write(reg=LSA_COMMAND, data=cmd)
@@ -37,7 +37,7 @@ class LightSensorArray:
     def wakeup(self) -> None:
         self.send_command(b'P')
 
-    def goto_sleep(self) -> None:
+    def sleep(self) -> None:
         self.command(b'D')
 
     def read_calibrated(self) -> bytearray | None:
