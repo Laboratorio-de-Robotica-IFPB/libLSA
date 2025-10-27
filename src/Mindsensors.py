@@ -11,8 +11,6 @@ LSA_WHITE_CALIBRATION_DATA  = const(0x5A)
 LSA_BLACK_CALIBRATION_DATA  = const(0x62)
 
 class LightSensorArray:
-    device_address = 0
-
     def __init__(self, port):
         self.port = port
         self.device_addres = LSA_DEFAULT_ADDRESS
@@ -35,36 +33,30 @@ class LightSensorArray:
     def calibrate_black(self) -> None:
         self.send_command(b'B')
 
+    # TODO: needs testing
     def wakeup(self) -> None:
         self.send_command(b'P')
 
+    # TODO: needs testing
     def sleep(self) -> None:
         self.command(b'D')
 
-    def read_calibrated(self) -> bytearray | None:
-        return self.get_data(LSA_CALIBRATED, 8)
+    def read_calibrated(self) -> list | None:
+        return [ x for x in self.get_data(LSA_CALIBRATED, 8)]
 
-    def get_raw_voltages(self) -> bytearray | None:
-        s = self.get_data(LSA_UNCALIBRATED, 16)
-        array = [ int(s[0:1]), s[2:3], s[4:5], s[6:7], s[8:9], s[10:11], s[12:13], s[14:15] ]
-        return array
+    # TODO: select the valid elements for reading the raw voltage of each sensor 
+    # apparently, the odd indexes are always 0 
+    def read_raw(self) -> list | None:
+        return [x for x in self.get_data(LSA_UNCALIBRATED, 16)]
 
-    def get_white_limit(self) -> bytearray | None:
-        data = self.get_data(LSA_WHITE_LIMIT, 8)
-        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
-        return arr
+    def get_white_limit(self) -> list | None: 
+        return [x for x in self.get_data(LSA_WHITE_LIMIT, 8)]
 
-    def get_black_limit(self) -> bytearray | None:
-        data = self.get_data(LSA_BLACK_LIMIT, 8)
-        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
-        return arr
+    def get_black_limit(self) -> list | None:
+        return [x for x in self.get_data(LSA_BLACK_LIMIT, 8)]
 
-    def get_white_calibration_data(self) -> bytearray | None:
-        data = self.get_data(LSA_WHITE_CALIBRATION_DATA, 8)
-        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
-        return arr
+    def get_white_calibration_data(self) -> list | None:
+        return [x for x in self.get_data(LSA_WHITE_CALIBRATION_DATA, 8)]
 
-    def get_black_calibration_data(self) -> bytearray | None:
-        data = self.get_data(LSA_BLACK_CALIBRATION_DATA, 8)
-        arr = [ data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7] ]
-        return arr
+    def get_black_calibration_data(self) -> list | None:
+        return [x for x in self.get_data(LSA_BLACK_CALIBRATION_DATA, 8)]
