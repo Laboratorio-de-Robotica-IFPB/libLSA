@@ -1,4 +1,4 @@
-# libLSA - Biblioteca para utilizar o LightArraySensor no ev3dev
+# libLSA - Biblioteca para utilizar o LightSensorArray no ev3dev
 
 O objetivo desse projeto é conseguir controlar todas as funcionalidades presentes no sensor da mindsensors, de forma programática, utilizando o micropython e a plataforma do ev3dev
 
