@@ -1,4 +1,5 @@
 from pybricks.iodevices  import I2CDevice
+from micropython import const
 
 LSA_DEFAULT_ADDRESS         = const(0x14)
 LSA_COMMAND                 = const(0x41)
